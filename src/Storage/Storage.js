@@ -28,6 +28,17 @@ export async function storeIntroMusic(userId, musicLink) {
   await client.writeTable(table, item)
 }
 
+export async function removeIntroMusic(userId) {
+  const client = await fetchDynamoClient()
+
+  const table = 'IntroMusic'
+  const deleteParams = {
+    userId: userId,
+  }
+
+  await client.deleteItemFromTable(table, deleteParams)
+}
+
 export async function fetchIntroMusic(userId) {
   const client = await fetchDynamoClient()
 

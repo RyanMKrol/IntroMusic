@@ -48,6 +48,25 @@ class DynamoDBWrapper {
       })
     })
   }
+
+  async deleteItemFromTable(table, deleteParams) {
+    const docClient = new AWS.DynamoDB.DocumentClient()
+
+    const params = {
+      TableName: table,
+      Key: deleteParams,
+    }
+
+    return new Promise((resolve, reject) => {
+      docClient.delete(params, function (err, data) {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data)
+        }
+      })
+    })
+  }
 }
 
 function validateCredentials(credentials) {
