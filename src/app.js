@@ -7,6 +7,7 @@ import {
   COMMAND_REMOVE,
   DISCORD_TOKEN_FILE_LOCATION,
   COMMAND_PREFIX,
+  MAX_PLAY_TIME,
 } from './Utils/Constants.js'
 import {
   storeIntroMusic,
@@ -82,6 +83,10 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
         filter: 'audioonly',
       })
       const dispatcher = connection.play(stream)
+
+      setTimeout(function () {
+        dispatcher.pause()
+      }, MAX_PLAY_TIME)
     })
   }
 })
