@@ -6,6 +6,7 @@ import {
   COMMAND_ADD,
   COMMAND_REMOVE,
   DISCORD_TOKEN_FILE_LOCATION,
+  COMMAND_PREFIX,
 } from './Utils/Constants.js'
 import {
   storeIntroMusic,
@@ -15,38 +16,50 @@ import {
 
 const client = new Discord.Client()
 
-const commandPrefix = '!intro'
-
 client.on('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`)
 })
 
+client.on('guildCreate', async (guild) => {
+  guild.channels.cache
+    .find((t) => t.name == 'general')
+    .send(
+      `Thanks for inviting my bot! You can use it via the following commands:\n` +
+        `- \`${COMMAND_PREFIX}${COMMAND_ADD} <youtube_link>\`\n` +
+        `- \`${COMMAND_PREFIX}${COMMAND_REMOVE}\``
+    )
+})
+
 client.on('message', async (message) => {
-  // message.author.id - the user ID to store in the database
-
   // ignore any messages not prefixed, or by a bot
-  if (!message.content.startsWith(commandPrefix) || message.author.bot) return
+  if (!message.content.startsWith(COMMAND_PREFIX) || message.author.bot) return
 
-  const args = message.content.slice(commandPrefix.length).split(' ')
+  const args = message.content.slice(COMMAND_PREFIX.length).split(' ')
   const command = args.shift()
 
   if (command === COMMAND_ADD) {
     if (args.length !== 1) {
       message.reply(
-        'The command format is incorrect, please use the following format: \n`!intro<Command> <youtube link>`'
+        `The command format is incorrect, please use the following format: \n\`${COMMAND_PREFIX}<Command> <youtube link>\``
       )
     } else {
       await storeIntroMusic(message.author.id, args[0])
       message.reply('Stored your preference!')
     }
   } else if (command === COMMAND_REMOVE) {
-    await removeIntroMusic(message.author.id)
-    message.reply('Removed your preference!')
+    if (args.length !== 0) {
+      message.reply(
+        `The command format is incorrect, please use the following format: \n\`${COMMAND_PREFIX}${COMMAND_REMOVE}\``
+      )
+    } else {
+      await removeIntroMusic(message.author.id)
+      message.reply('Removed your preference!')
+    }
   } else {
     message.reply(
-      `This command (\`${commandPrefix}${command}\`) isn't supported, please use one of:\n` +
-        `* \`${commandPrefix}${COMMAND_ADD}\`\n` +
-        `* \`${commandPrefix}${COMMAND_REMOVE}\``
+      `This command (\`${COMMAND_PREFIX}${command}\`) isn't supported, please use one of:\n` +
+        `- \`${COMMAND_PREFIX}${COMMAND_ADD}\`\n` +
+        `- \`${COMMAND_PREFIX}${COMMAND_REMOVE}\``
     )
   }
 })
