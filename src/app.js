@@ -9,11 +9,9 @@ import {
   COMMAND_PREFIX,
   MAX_PLAY_TIME,
 } from './Utils/Constants.js'
-import {
-  storeIntroMusic,
-  fetchIntroMusic,
-  removeIntroMusic,
-} from './Storage/Storage.js'
+import { fetchIntroMusic } from './Storage/Storage.js'
+import { add } from './Commands/Add.js'
+import { remove } from './Commands/Remove.js'
 
 const client = new Discord.Client()
 
@@ -27,10 +25,12 @@ client.on('guildCreate', async (guild) => {
     .send(
       `Thanks for inviting my bot! You can use it via the following commands:\n` +
         `- \`${COMMAND_PREFIX}${COMMAND_ADD} <youtube_link>\`\n` +
-        `- \`${COMMAND_PREFIX}${COMMAND_REMOVE}\``
+        `- \`${COMMAND_PREFIX}${COMMAND_REMOVE}\`\n` +
+        `Note: only the first 10 seconds of the video you pick will play, so choose wisely.`
     )
 })
 
+// handles adding/removing intro music
 client.on('message', async (message) => {
   // ignore any messages not prefixed, or by a bot
   if (!message.content.startsWith(COMMAND_PREFIX) || message.author.bot) return
@@ -44,8 +44,7 @@ client.on('message', async (message) => {
         `The command format is incorrect, please use the following format: \n\`${COMMAND_PREFIX}<Command> <youtube link>\``
       )
     } else {
-      await storeIntroMusic(message.author.id, args[0])
-      message.reply('Stored your preference!')
+      add(message, args[0])
     }
   } else if (command === COMMAND_REMOVE) {
     if (args.length !== 0) {
@@ -53,8 +52,7 @@ client.on('message', async (message) => {
         `The command format is incorrect, please use the following format: \n\`${COMMAND_PREFIX}${COMMAND_REMOVE}\``
       )
     } else {
-      await removeIntroMusic(message.author.id)
-      message.reply('Removed your preference!')
+      remove(message)
     }
   } else {
     message.reply(
@@ -65,9 +63,10 @@ client.on('message', async (message) => {
   }
 })
 
+// handles playing the video when somebody joins the server
 client.on('voiceStateUpdate', async (oldState, newState) => {
-  let oldUserChannel = oldState.channelID
   let newUserChannel = newState.channelID
+  let oldUserChannel = oldState.channelID
 
   if (
     isUndefined(oldUserChannel) &&
