@@ -9,10 +9,13 @@
   "type": "module",
   "main": "src/app.js",
   "dependencies": {
+    "@discordjs/opus": "^0.3.2",
+    "aws-sdk": "^2.713.0",
     "discord.js": "^12.2.0",
     "fs": "0.0.1-security",
     "path": "^0.12.7",
-    "util": "^0.12.3"
+    "util": "^0.12.3",
+    "ytdl-core": "^3.1.2"
   },
   "devDependencies": {}
 }
