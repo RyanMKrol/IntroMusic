@@ -1,10 +1,10 @@
 cd ~
-rm -rf BaseNodeApiProject
-git clone https://github.com/RyanMKrol/BaseNodeApiProject.git
-cd BaseNodeApiProject
+rm -rf IntroMusic
+git clone https://github.com/RyanMKrol/IntroMusic.git
+cd IntroMusic
 git pull
 npm install
 npm run build
-pm2 delete BaseNodeApiProject
-pm2 start build/bin/www.js --name BaseNodeApiProject
+pm2 delete IntroMusic
+pm2 start build/bin/www.js --name IntroMusic
 pm2 save
