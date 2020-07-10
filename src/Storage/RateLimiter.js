@@ -1,5 +1,5 @@
 export const RATE_LIMIT_TIMER_MINUTES = 5
-export const OPERATIONS_PER_PERIOD = 5
+export const OPERATIONS_PER_PERIOD = 10
 
 let rateLimitData = {}
 
