@@ -7,7 +7,11 @@ import {
   COMMAND_REMOVE,
   DISCORD_TOKEN_FILE_LOCATION,
 } from './Utils/Constants.js'
-import { storeIntroMusic, fetchIntroMusic } from './Storage/Storage.js'
+import {
+  storeIntroMusic,
+  fetchIntroMusic,
+  removeIntroMusic,
+} from './Storage/Storage.js'
 
 const client = new Discord.Client()
 
@@ -26,18 +30,18 @@ client.on('message', async (message) => {
   const args = message.content.slice(commandPrefix.length).split(' ')
   const command = args.shift()
 
-  if (args.length !== 1) {
-    message.reply(
-      'The command format is incorrect, please use the following format: \n`!intro<Command> <youtube link>`'
-    )
-  }
-
   if (command === COMMAND_ADD) {
-    await storeIntroMusic(message.author.id, args[0])
-    message.reply('Stored your preference!')
-    // do something to add
+    if (args.length !== 1) {
+      message.reply(
+        'The command format is incorrect, please use the following format: \n`!intro<Command> <youtube link>`'
+      )
+    } else {
+      await storeIntroMusic(message.author.id, args[0])
+      message.reply('Stored your preference!')
+    }
   } else if (command === COMMAND_REMOVE) {
-    // do something to remove
+    await removeIntroMusic(message.author.id)
+    message.reply('Removed your preference!')
   } else {
     message.reply(
       `This command (\`${commandPrefix}${command}\`) isn't supported, please use one of:\n` +
@@ -56,10 +60,12 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     !isUndefined(newUserChannel) &&
     !newState.member.user.bot
   ) {
-    const introMusic = await fetchIntroMusic(newState.member.user.id)
+    const introMusicData = await fetchIntroMusic(newState.member.user.id)
+
+    if (introMusicData.Count !== 1) return
 
     newState.channel.join().then((connection) => {
-      const stream = ytdl(introMusic.Items[0].link, {
+      const stream = ytdl(introMusicData.Items[0].link, {
         filter: 'audioonly',
       })
       const dispatcher = connection.play(stream)
