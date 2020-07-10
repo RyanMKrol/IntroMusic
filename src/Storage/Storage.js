@@ -18,7 +18,6 @@ async function fetchDynamoClient() {
 
 export async function storeIntroMusic(userId, musicLink) {
   const client = await fetchDynamoClient()
-
   const table = 'IntroMusic'
   const item = {
     userId: userId,
