@@ -13,6 +13,7 @@ import {
 import { fetchIntroMusic } from './Storage/Storage.js'
 import { add } from './Commands/Add.js'
 import { remove } from './Commands/Remove.js'
+import { defaultCommand } from './Commands/DefaultCommand.js'
 
 const client = new Discord.Client()
 let isClientPlaying = false
@@ -34,7 +35,7 @@ client.on('guildCreate', async (guild) => {
 
 // handles adding/removing intro music
 client.on('message', async (message) => {
-  // ignore any messages not prefixed, or by a bot
+  // ignore any messages not prefixed with our command prefix, or messages made by a bot
   if (!message.content.startsWith(COMMAND_PREFIX) || message.author.bot) return
 
   const args = message.content.slice(COMMAND_PREFIX.length).split(' ')
@@ -43,19 +44,9 @@ client.on('message', async (message) => {
   if (command === COMMAND_ADD) {
     add(message, args)
   } else if (command === COMMAND_REMOVE) {
-    if (args.length !== 0) {
-      message.reply(
-        `The command format is incorrect, please use the following format: \n\`${COMMAND_PREFIX}${COMMAND_REMOVE}\``
-      )
-    } else {
-      remove(message)
-    }
+    remove(message, args)
   } else {
-    message.reply(
-      `This command (\`${COMMAND_PREFIX}${command}\`) isn't supported, please use one of:\n` +
-        `- \`${COMMAND_PREFIX}${COMMAND_ADD}\`\n` +
-        `- \`${COMMAND_PREFIX}${COMMAND_REMOVE}\``
-    )
+    defaultCommand(message, command)
   }
 })
 
