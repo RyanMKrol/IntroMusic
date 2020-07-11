@@ -81,7 +81,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
       const stream = ytdl(introMusicData.Items[0].link, {
         filter: 'audioonly',
       })
-      const dispatcher = connection.play(stream)
+      const dispatcher = connection.play(stream, { volume: 0.15 })
 
       setTimeout(function () {
         dispatcher.pause()
