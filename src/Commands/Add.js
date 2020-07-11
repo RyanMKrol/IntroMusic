@@ -8,18 +8,7 @@ export async function add(messageHook, args) {
   if (!(await validatedArgs(messageHook, args))) return
 
   const method = async () => {
-    const youtubeLink = args[0]
-    const information = await ytdl.getInfo(youtubeLink)
-    const isAvailable = information.formats.length > 0
-
-    if (!isAvailable) {
-      await messageHook.reply(
-        "Sorry, could not add your video, it doesn't appear to be available!"
-      )
-      return
-    }
-
-    await storeIntroMusic(messageHook.author.id, youtubeLink)
+    await storeIntroMusic(messageHook.author.id, args[0])
     await messageHook.reply('Added your new intro music!')
   }
 
@@ -37,6 +26,16 @@ async function validatedArgs(messageHook, args) {
   if (!(await ytdl.validateURL(args[0]))) {
     await messageHook.reply(
       "Sorry, we couldn't recognise your link as a valid youtube video!"
+    )
+    return false
+  }
+
+  const information = await ytdl.getInfo(args[0])
+  const isAvailable = information.formats.length > 0
+
+  if (!isAvailable) {
+    await messageHook.reply(
+      "Sorry, could not add your video, it doesn't appear to be available!"
     )
     return false
   }
