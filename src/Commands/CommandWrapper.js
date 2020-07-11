@@ -12,7 +12,7 @@ export async function doCommandWithRateLimit(messageHook, desiredFunction) {
   updateRateLimitForUser(userId)
 
   if (hasUserExceededRateLimit(userId)) {
-    messageHook.reply(
+    await messageHook.reply(
       `You've exceeded the number of times (${OPERATIONS_PER_PERIOD}) you can do this over a ${RATE_LIMIT_TIMER_MINUTES} minute period, please try again in ${RATE_LIMIT_TIMER_MINUTES} minutes!`
     )
     return

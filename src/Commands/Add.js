@@ -1,6 +1,6 @@
 import ytdl from 'ytdl-core'
 
-import { COMMAND_PREFIX } from './../Utils/Constants.js'
+import { COMMAND_PREFIX, COMMAND_ADD } from './../Utils/Constants.js'
 import { storeIntroMusic } from './../Storage/Storage.js'
 import { doCommandWithRateLimit } from './CommandWrapper.js'
 
@@ -23,13 +23,13 @@ export async function add(messageHook, args) {
     await messageHook.reply('Added your new intro music!')
   }
 
-  doCommandWithRateLimit(messageHook, method)
+  await doCommandWithRateLimit(messageHook, method)
 }
 
 async function validatedArgs(messageHook, args) {
   if (args.length !== 1) {
     await messageHook.reply(
-      `The command format is incorrect, please use the following format: \n\`${COMMAND_PREFIX}<Command> <youtube link>\``
+      `The command format is incorrect, please use the following format: \n\`${COMMAND_PREFIX}${COMMAND_ADD} <youtube_link>\``
     )
     return false
   }
