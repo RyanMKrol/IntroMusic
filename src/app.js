@@ -69,7 +69,11 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     if (introMusicData.Count !== 1) return
 
     newState.channel.join().then(async (connection) => {
-      const stream = await ytdl(introMusicData.Items[0].link)
+      const stream = await ytdl(introMusicData.Items[0].link, {
+        filter: (format) =>
+          format.container === 'webm' && format.codecs === 'opus',
+      })
+
       const dispatcher = connection.play(stream, { volume: 0.5, type: 'opus' })
 
       setTimeout(function () {
