@@ -41,13 +41,7 @@ client.on('message', async (message) => {
   const command = args.shift()
 
   if (command === COMMAND_ADD) {
-    if (args.length !== 1) {
-      message.reply(
-        `The command format is incorrect, please use the following format: \n\`${COMMAND_PREFIX}<Command> <youtube link>\``
-      )
-    } else {
-      add(message, args[0])
-    }
+    add(message, args)
   } else if (command === COMMAND_REMOVE) {
     if (args.length !== 0) {
       message.reply(
@@ -83,11 +77,9 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
     if (introMusicData.Count !== 1) return
 
-    newState.channel.join().then((connection) => {
-      const stream = ytdl(introMusicData.Items[0].link, {
-        filter: 'audioonly',
-      })
-      const dispatcher = connection.play(stream, { volume: 0.15 })
+    newState.channel.join().then(async (connection) => {
+      const stream = await ytdl(introMusicData.Items[0].link)
+      const dispatcher = connection.play(stream, { volume: 0.5 })
 
       setTimeout(function () {
         dispatcher.pause()
