@@ -2,9 +2,11 @@ cd ~
 rm -rf IntroMusic
 git clone https://github.com/RyanMKrol/IntroMusic.git
 cd IntroMusic
+openssl aes-256-cbc -d -a -in credentials/discordToken.json.enc -out credentials/discordToken.json -k $AES_PASS
+openssl aes-256-cbc -d -a -in credentials/dynamoCredentials.json.enc -out credentials/dynamoCredentials.json -k $AES_PASS
 git pull
 npm install
 npm run build
 pm2 delete IntroMusic
-pm2 start build/bin/www.js --name IntroMusic
+pm2 start src/app.js --name IntroMusic
 pm2 save
