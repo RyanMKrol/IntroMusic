@@ -2,6 +2,7 @@ import Discord from 'discord.js'
 import ytdl from 'ytdl-core'
 import { readJsonFile } from './Utils/ReadJsonFile.js'
 import { isUndefined } from './Utils/IsUndefined.js'
+import PlayerState from './Utils/PlayerState.js'
 import {
   COMMAND_ADD,
   COMMAND_REMOVE,
@@ -14,6 +15,7 @@ import { add } from './Commands/Add.js'
 import { remove } from './Commands/Remove.js'
 
 const client = new Discord.Client()
+let isClientPlaying = false
 
 client.on('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`)
@@ -65,14 +67,18 @@ client.on('message', async (message) => {
 
 // handles playing the video when somebody joins the server
 client.on('voiceStateUpdate', async (oldState, newState) => {
+  const playerState = new PlayerState()
+
   let newUserChannel = newState.channelID
   let oldUserChannel = oldState.channelID
 
   if (
     isUndefined(oldUserChannel) &&
     !isUndefined(newUserChannel) &&
-    !newState.member.user.bot
+    !newState.member.user.bot &&
+    !playerState.isPlaying()
   ) {
+    playerState.setIsPlaying(true)
     const introMusicData = await fetchIntroMusic(newState.member.user.id)
 
     if (introMusicData.Count !== 1) return
@@ -85,6 +91,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
       setTimeout(function () {
         dispatcher.pause()
+        playerState.setIsPlaying(false)
       }, MAX_PLAY_TIME)
     })
   }
