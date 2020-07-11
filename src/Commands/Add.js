@@ -1,4 +1,4 @@
-import ytdl from 'ytdl-core'
+import ytdl from 'ytdl-core-discord'
 
 import { COMMAND_PREFIX, COMMAND_ADD } from './../Utils/Constants.js'
 import { storeIntroMusic } from './../Storage/Storage.js'

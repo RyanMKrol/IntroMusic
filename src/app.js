@@ -1,5 +1,5 @@
 import Discord from 'discord.js'
-import ytdl from 'ytdl-core'
+import ytdl from 'ytdl-core-discord'
 import { readJsonFile } from './Utils/ReadJsonFile.js'
 import { isUndefined } from './Utils/IsUndefined.js'
 import PlayerState from './Utils/PlayerState.js'
@@ -70,7 +70,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
     newState.channel.join().then(async (connection) => {
       const stream = await ytdl(introMusicData.Items[0].link)
-      const dispatcher = connection.play(stream, { volume: 0.5 })
+      const dispatcher = connection.play(stream, { volume: 0.5, type: 'opus' })
 
       setTimeout(function () {
         dispatcher.pause()
