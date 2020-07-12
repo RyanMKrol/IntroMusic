@@ -69,17 +69,24 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     if (introMusicData.Count !== 1) return
 
     newState.channel.join().then(async (connection) => {
-      const stream = await ytdl(introMusicData.Items[0].link, {
-        filter: (format) =>
-          format.container === 'webm' && format.codecs === 'opus',
+      const stream = await ytdl(introMusicData.Items[0].link)
+
+      const dispatcher = await connection.play(stream, {
+        volume: 0.5,
       })
 
-      const dispatcher = connection.play(stream, { volume: 0.5, type: 'opus' })
-
-      setTimeout(async function () {
-        playerState.setIsPlaying(false)
-        await connection.disconnect()
+      const playerTimeout = setTimeout(async function () {
+        if (playerState.isPlaying()) {
+          playerState.setIsPlaying(false)
+          await connection.disconnect()
+        }
       }, MAX_PLAY_TIME)
+
+      dispatcher.on('finish', async () => {
+        playerState.setIsPlaying(false)
+        clearTimeout(playerTimeout)
+        await connection.disconnect()
+      })
     })
   }
 })
