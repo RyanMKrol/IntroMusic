@@ -76,9 +76,9 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
       const dispatcher = connection.play(stream, { volume: 0.5, type: 'opus' })
 
-      setTimeout(function () {
-        dispatcher.pause()
+      setTimeout(async function () {
         playerState.setIsPlaying(false)
+        await connection.disconnect()
       }, MAX_PLAY_TIME)
     })
   }
