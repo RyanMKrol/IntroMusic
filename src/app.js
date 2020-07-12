@@ -1,5 +1,5 @@
 import Discord from 'discord.js'
-import ytdl from 'ytdl-core-discord'
+import ytdl from 'ytdl-core'
 import { readJsonFile } from './Utils/ReadJsonFile.js'
 import { isUndefined } from './Utils/IsUndefined.js'
 import PlayerState from './Utils/PlayerState.js'
