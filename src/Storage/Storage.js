@@ -1,4 +1,4 @@
-import DynamoDBWrapper from './DynamoClient.js'
+import DynamoDBWrapper from 'noodle-dynamo'
 import { readJsonFile } from './../Utils/ReadJsonFile.js'
 import { DYNAMO_CREDENTIALS_FILE_LOCATION } from './../Utils/Constants.js'
 
@@ -9,7 +9,6 @@ async function fetchDynamoClient() {
     const dynamoCredentials = await readJsonFile(
       DYNAMO_CREDENTIALS_FILE_LOCATION
     )
-
     dynamoDb = new DynamoDBWrapper(dynamoCredentials, 'us-east-2')
   }
 
@@ -21,7 +20,7 @@ export async function storeIntroMusic(userId, musicLink) {
   const table = 'IntroMusic'
   const item = {
     userId: userId,
-    link: musicLink,
+    link: musicLink
   }
 
   await client.writeTable(table, item)
@@ -32,7 +31,7 @@ export async function removeIntroMusic(userId) {
 
   const table = 'IntroMusic'
   const deleteParams = {
-    userId: userId,
+    userId: userId
   }
 
   await client.deleteItemFromTable(table, deleteParams)
@@ -44,7 +43,7 @@ export async function fetchIntroMusic(userId) {
   const table = 'IntroMusic'
   const expression = 'userId = :userId'
   const expressionData = {
-    ':userId': userId,
+    ':userId': userId
   }
 
   return await client.readTable(table, expression, expressionData)
