@@ -15,20 +15,20 @@ class PlayerManager {
    * Method to update the state of a given player
    *
    * @param {string} guildId The ID of the guild that this player belongs to
-   * @param {object} newState The new state of a player
+   * @param {boolean} isPlaying Whether the player is playing or not
    */
-  updateState(guildId, newState) {
-    this.players[guildId] = newState;
+  setIsPlayerPlaying(guildId, isPlaying) {
+    this.players[guildId] = isPlaying;
   }
 
   /**
    * Method to fetch the state of a given player
    *
    * @param {string} guildId The ID of the guild we want the player from
-   * @returns {object} The state of the player associated with the guild ID
+   * @returns {boolean} Whether the player is playing or not
    */
-  getPlayerState(guildId) {
-    return this.players[guildId];
+  getIsPlayerPlaying(guildId) {
+    return this.players[guildId] || false;
   }
 }
 
