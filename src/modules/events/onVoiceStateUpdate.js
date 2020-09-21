@@ -4,6 +4,7 @@ import { isUndefined } from 'noodle-utils';
 import ytdl from 'ytdl-core';
 
 import { MAX_PLAY_TIME } from '../constants';
+import playerManager from '../data-structures';
 
 /**
  * Method to handle when the voice state changes in any discord server this bot is in
@@ -15,7 +16,16 @@ async function voiceStateUpdate(oldState, newState) {
   const newUserChannel = newState.channelID;
   const oldUserChannel = oldState.channelID;
 
-  if (isUndefined(oldUserChannel) && !isUndefined(newUserChannel) && !newState.member.user.bot) {
+  const guildId = oldState.guild.id;
+
+  if (
+    isUndefined(oldUserChannel)
+    && !isUndefined(newUserChannel)
+    && !newState.member.user.bot
+    && !playerManager.getIsPlayerPlaying(guildId)
+  ) {
+    playerManager.setIsPlayerPlaying(guildId, true);
+
     const introMusicData = 'https://www.youtube.com/watch?v=fTwKPot-ds0';
 
     newState.channel.join().then(async (connection) => {
@@ -26,12 +36,16 @@ async function voiceStateUpdate(oldState, newState) {
       });
 
       const playerTimeout = setTimeout(async () => {
-        await connection.disconnect();
+        if (playerManager.getIsPlayerPlaying(guildId)) {
+          await connection.disconnect();
+          playerManager.setIsPlayerPlaying(guildId, false);
+        }
       }, MAX_PLAY_TIME);
 
       dispatcher.on('finish', async () => {
-        clearTimeout(playerTimeout);
+        playerManager.setIsPlayerPlaying(guildId, false);
         await connection.disconnect();
+        clearTimeout(playerTimeout);
       });
     });
   }
