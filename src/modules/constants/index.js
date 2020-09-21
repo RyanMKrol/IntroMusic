@@ -1,0 +1,16 @@
+const COMMAND_PREFIX = '!IM';
+const COMMAND_ADD = 'Add';
+const COMMAND_REMOVE = 'Remove';
+
+const DISCORD_TOKEN_FILE_LOCATION = '/credentials/discordToken.json';
+const DYNAMO_CREDENTIALS_FILE_LOCATION = '/credentials/dynamoCredentials.json';
+const MAX_PLAY_TIME = 12000;
+
+export {
+  COMMAND_PREFIX,
+  COMMAND_ADD,
+  COMMAND_REMOVE,
+  DISCORD_TOKEN_FILE_LOCATION,
+  DYNAMO_CREDENTIALS_FILE_LOCATION,
+  MAX_PLAY_TIME,
+};
