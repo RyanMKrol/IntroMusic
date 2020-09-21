@@ -2,7 +2,7 @@
 
 import Discord from 'discord.js';
 
-import { DYNAMO_CREDENTIALS } from './modules/constants';
+import { DISCORD_CREDENTIALS } from './modules/constants';
 import { onGuildCreate, onMessage, onVoiceStateUpdate } from './modules/events';
 
 /**
@@ -32,4 +32,4 @@ client.on('guildCreate', onGuildCreate);
 client.on('message', onMessage);
 client.on('voiceStateUpdate', onVoiceStateUpdate);
 
-client.login(DYNAMO_CREDENTIALS.token);
+client.login(DISCORD_CREDENTIALS.token);
