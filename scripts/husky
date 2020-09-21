@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# makes the script fail out if any single command fails
+set -e;
+
+# build script
+npm run build;
+npx sort-package-json package.json;
+git add package.json;

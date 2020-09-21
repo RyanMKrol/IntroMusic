@@ -10,7 +10,6 @@
 
 # production
 /build
-/lib
 
 # misc
 .DS_Store
@@ -25,3 +24,5 @@ yarn-error.log*
 
 credentials/*
 !credentials/*.enc
+
+config.json

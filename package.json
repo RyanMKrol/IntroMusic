@@ -1,27 +1,30 @@
 {
   "name": "IntroMusic",
-  "version": "0.0.1",
-  "private": true,
+  "version": "1.0.0",
+  "license": "MIT",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "./node_modules/.bin/babel src --out-dir lib",
-    "start": "npm run build && node lib/app.js"
+    "build": "npm run lint && ./node_modules/.bin/babel src --out-dir build",
+    "lint": "eslint src/ --ext .js",
+    "start": "npm run-script build && node build/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "./scripts/husky"
+    }
   },
   "dependencies": {
-    "@babel/polyfill": "^7.10.4",
-    "core-js": "^3.6.5",
-    "discord.js": "^12.2.0",
-    "ffmpeg-static": "^4.2.5",
-    "fs": "0.0.1-security",
-    "noodle-dynamo": "^1.0.4",
-    "opusscript": "0.0.7",
-    "path": "^0.12.7",
-    "util": "^0.12.3",
-    "ytdl-core": "^3.1.2"
+    "@babel/polyfill": "^7.10.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.4",
     "@babel/core": "^7.10.4",
-    "@babel/preset-env": "^7.10.4"
+    "@babel/preset-env": "^7.10.4",
+    "eslint": "^7.4.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jsdoc": "^30.4.1",
+    "husky": "^4.2.5",
+    "jsdoc": "^3.6.5"
   }
 }
