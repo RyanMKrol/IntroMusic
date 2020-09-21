@@ -1,5 +1,10 @@
 /** @module app */
 
+import Discord from 'discord.js';
+
+import { DYNAMO_CREDENTIALS } from './modules/constants';
+import { onGuildCreate, onMessage, onVoiceStateUpdate } from './modules/events';
+
 /**
  * Type representing the guild object from discord.js
  *
@@ -21,4 +26,10 @@
  * @see https://discord.js.org/#/docs/main/stable/class/VoiceState
  */
 
-process.stdout.write('Hello World!');
+const client = new Discord.Client();
+
+client.on('guildCreate', onGuildCreate);
+client.on('message', onMessage);
+client.on('voiceStateUpdate', onVoiceStateUpdate);
+
+client.login(DYNAMO_CREDENTIALS.token);
