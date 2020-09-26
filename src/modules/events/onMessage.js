@@ -1,4 +1,5 @@
-import { COMMAND_PREFIX, COMMAND_ADD, COMMAND_REMOVE } from '../constants';
+import { COMMAND_PREFIX } from '../constants';
+import { add, remove } from '../commands';
 
 /**
  * Method to handle when the bot is messaged by a user
@@ -9,16 +10,8 @@ async function onMessage(message) {
   // ignore any messages not prefixed with our command prefix, or messages made by a bot
   if (!message.content.startsWith(COMMAND_PREFIX) || message.author.bot) return;
 
-  const args = message.content.slice(COMMAND_PREFIX.length).split(' ');
-  const command = args.shift();
-
-  if (command === COMMAND_ADD) {
-    // add new intro music
-  } else if (command === COMMAND_REMOVE) {
-    // remove current intro music
-  } else {
-    // send a default response
-  }
+  add(message);
+  remove(message);
 }
 
 export default onMessage;
