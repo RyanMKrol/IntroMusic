@@ -1,5 +1,3 @@
-/** @memberof data-structures */
-
 /**
  * A class to manage the state of all players run by this service
  */

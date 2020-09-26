@@ -1,5 +1,3 @@
-/** @memberof events */
-
 import { COMMAND_PREFIX, COMMAND_ADD, COMMAND_REMOVE } from '../constants';
 
 /**

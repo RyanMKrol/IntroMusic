@@ -1,5 +1,3 @@
-/** @memberof events */
-
 import { isUndefined } from 'noodle-utils';
 import ytdl from 'ytdl-core';
 
