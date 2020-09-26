@@ -26,8 +26,8 @@ async function add(messageHook) {
   const youtubeLinkArray = command.slice(REGEX_BASE.length).split(' ');
   const link = youtubeLinkArray[0];
 
-  if (!(await validateYoutubeLink(messageHook, link))) return false;
-  if (!(await validateYoutubeVideoAvailable(messageHook, link))) return false;
+  if (!(await validateYoutubeLink(messageHook, link))) return true;
+  if (!(await validateYoutubeVideoAvailable(messageHook, link))) return true;
 
   storeNewLink(messageHook, link);
 
