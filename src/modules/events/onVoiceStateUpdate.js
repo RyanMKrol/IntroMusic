@@ -107,7 +107,7 @@ function shouldPlayIntro(oldState, newState) {
 }
 
 /**
- * Validates whether we can use the respons from the database or not
+ * Validates whether we can use the response from the database or not
  *
  * @param {Array.<DynamoReadResult>} dbResponse The result of the database read
  * @returns {boolean} Whether the response was validated or not
