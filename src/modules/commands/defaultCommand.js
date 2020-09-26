@@ -6,17 +6,20 @@ const IS_BOT_COMMAND_REGEX = `${COMMAND_PREFIX} .*`;
  * Handles any command not caught by the previous processing
  *
  * @param {module:app.Message} messageHook The hook that contains the command being used
+ * @returns {boolean} Whethe the message was handled by this handler
  */
 async function defaultCommand(messageHook) {
   const command = messageHook.content;
 
-  if (!isBotCommand(command)) return;
+  if (!isBotCommand(command)) return false;
 
   await messageHook.reply(
     `This command (\`${command}\`) isn't supported, please use one of:\n`
       + `- \`${COMMAND_PREFIX} ${COMMAND_ADD} <youtube_link>\`\n`
       + `- \`${COMMAND_PREFIX} ${COMMAND_REMOVE}\``,
   );
+
+  return true;
 }
 
 /**
