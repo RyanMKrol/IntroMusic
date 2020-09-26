@@ -13,14 +13,17 @@ const DELETE_QUEUE = new DynamoDeleteQueue(DYNAMO_CREDENTIALS, DYNAMO_REGION, DY
 /**
  * Handles the remove command
  *
- * @param {module:app.Message} messageHook The hook that contains the cmomand being used
+ * @param {module:app.Message} messageHook The hook that contains the command being used
+ * @returns {boolean} Whether this was the command to run or not
  */
 async function remove(messageHook) {
   const command = messageHook.content;
 
-  if (!isRemove(command)) return;
+  if (!isRemove(command)) return false;
 
   removeLink(messageHook);
+
+  return true;
 }
 
 /**

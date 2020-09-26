@@ -14,21 +14,24 @@ const WRITE_QUEUE = new DynamoWriteQueue(DYNAMO_CREDENTIALS, DYNAMO_REGION, DYNA
 /**
  * Handles the add command
  *
- * @param {module:app.Message} messageHook The hook that contains the cmomand being used
+ * @param {module:app.Message} messageHook The hook that contains the command being used
+ * @returns {boolean} Whether this was the command to run or not
  */
 async function add(messageHook) {
   const command = messageHook.content;
 
-  if (!isAdd(command)) return;
+  if (!isAdd(command)) return false;
 
   // should be an array with one item - the link to set the intro music to
   const youtubeLinkArray = command.slice(REGEX_BASE.length).split(' ');
   const link = youtubeLinkArray[0];
 
-  if (!validateYoutubeLink(messageHook, link)) return;
-  if (!validateYoutubeVideoAvailable(messageHook, link)) return;
+  if (!(await validateYoutubeLink(messageHook, link))) return false;
+  if (!(await validateYoutubeVideoAvailable(messageHook, link))) return false;
 
   storeNewLink(messageHook, link);
+
+  return true;
 }
 
 /**
