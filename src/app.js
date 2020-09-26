@@ -26,6 +26,13 @@ import { onGuildCreate, onMessage, onVoiceStateUpdate } from './modules/events';
  * @see https://discord.js.org/#/docs/main/stable/class/VoiceState
  */
 
+/**
+ * Type representing the voice channel object from discord.js
+ *
+ * @typedef VoiceChannel
+ * @see https://discord.js.org/#/docs/main/stable/class/VoiceChannel
+ */
+
 const client = new Discord.Client();
 
 client.on('guildCreate', onGuildCreate);
