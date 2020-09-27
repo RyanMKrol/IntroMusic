@@ -1,4 +1,6 @@
 import { isUndefined, DynamoReadQueue } from 'noodle-utils';
+import ffmpeg from 'fluent-ffmpeg';
+import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import ytdl from 'ytdl-core';
 
 import {
@@ -6,6 +8,8 @@ import {
 } from '../constants';
 
 import PLAYER_MANAGER from '../data-structures';
+
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
 const READ_QUEUE = new DynamoReadQueue(DYNAMO_CREDENTIALS, DYNAMO_REGION, DYNAMO_TABLE);
 
@@ -64,24 +68,32 @@ async function databaseReadCallback(result, guildId, channel) {
   const { link } = result[0];
 
   channel.join().then(async (connection) => {
-    const stream = await ytdl(link);
+    const stream = ytdl(link);
 
-    const dispatcher = await connection.play(stream, {
-      volume: 0.5,
-    });
+    try {
+      const download = ffmpeg(stream)
+        .audioBitrate(48)
+        .format('mp3');
+      // .seekInput(0); will start integrating this later
+      const passthrough = await download.pipe();
 
-    const playerTimeout = setTimeout(async () => {
-      if (PLAYER_MANAGER.getIsPlayerPlaying(guildId)) {
-        await connection.disconnect();
+      const dispatcher = await connection.play(passthrough);
+
+      const playerTimeout = setTimeout(async () => {
+        if (PLAYER_MANAGER.getIsPlayerPlaying(guildId)) {
+          await connection.disconnect();
+          PLAYER_MANAGER.setIsPlayerPlaying(guildId, false);
+        }
+      }, MAX_PLAY_TIME);
+
+      dispatcher.on('finish', async () => {
         PLAYER_MANAGER.setIsPlayerPlaying(guildId, false);
-      }
-    }, MAX_PLAY_TIME);
-
-    dispatcher.on('finish', async () => {
-      PLAYER_MANAGER.setIsPlayerPlaying(guildId, false);
-      await connection.disconnect();
-      clearTimeout(playerTimeout);
-    });
+        await connection.disconnect();
+        clearTimeout(playerTimeout);
+      });
+    } catch (e) {
+      process.stdout.write(`There was an error playing the intro: ${e}`);
+    }
   });
 }
 
