@@ -1,5 +1,6 @@
 import ytdl from 'ytdl-core';
-import { DynamoWriteQueue } from 'noodle-utils';
+import { isUndefined, DynamoWriteQueue } from 'noodle-utils';
+
 import {
   COMMAND_PREFIX,
   COMMAND_ADD,
@@ -28,6 +29,7 @@ async function add(messageHook) {
 
   if (!(await validateYoutubeLink(messageHook, link))) return true;
   if (!(await validateYoutubeVideoAvailable(messageHook, link))) return true;
+  if (!(await validateYoutubeVideoTimestamp(messageHook, link))) return true;
 
   storeNewLink(messageHook, link);
 
@@ -71,6 +73,7 @@ async function validateYoutubeLink(responseHook, link) {
  */
 async function validateYoutubeVideoAvailable(responseHook, link) {
   const information = await ytdl.getInfo(link);
+
   const isAvailable = information.formats.length > 0;
 
   if (!isAvailable) {
@@ -78,6 +81,32 @@ async function validateYoutubeVideoAvailable(responseHook, link) {
   }
 
   return isAvailable;
+}
+
+/**
+ * Method to validate if the timestamp on the URL is within the length of the video
+ *
+ * @param {module:app.Message} responseHook The hook to respond with if the timestamp is invalid
+ * @param {string} link The youtube link to test
+ * @returns {boolean} Whether the timestamp is valid or not
+ */
+async function validateYoutubeVideoTimestamp(responseHook, link) {
+  const information = await ytdl.getInfo(link);
+  const videoLength = information.playerResponse.videoDetails.lengthSeconds;
+
+  const rawTimestamp = new URL(link).searchParams.get('t');
+
+  if (isUndefined(rawTimestamp)) return true;
+
+  const numTimestamp = Number.parseInt(rawTimestamp, 10);
+
+  const isTimestampValid = !Number.isNaN(numTimestamp) && numTimestamp < videoLength;
+
+  if (!isTimestampValid) {
+    await responseHook.reply("Sorry, the timestamp you've provided for the video is invalid");
+  }
+
+  return isTimestampValid;
 }
 
 /**
