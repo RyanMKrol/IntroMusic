@@ -4,7 +4,11 @@ import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import ytdl from 'ytdl-core';
 
 import {
-  MAX_PLAY_TIME, DYNAMO_CREDENTIALS, DYNAMO_REGION, DYNAMO_TABLE,
+  MAX_PLAY_TIME,
+  DYNAMO_CREDENTIALS,
+  DYNAMO_REGION,
+  DYNAMO_TABLE,
+  TIMESTAMP_QUERY_PARAM,
 } from '../constants';
 
 import PLAYER_MANAGER from '../data-structures';
@@ -69,12 +73,14 @@ async function databaseReadCallback(result, guildId, channel) {
 
   channel.join().then(async (connection) => {
     const stream = ytdl(link);
+    const rawTimestamp = new URL(link).searchParams.get(TIMESTAMP_QUERY_PARAM);
+    const timestamp = Number.parseInt(rawTimestamp, 10);
 
     try {
       const download = ffmpeg(stream)
         .audioBitrate(48)
-        .format('mp3');
-      // .seekInput(0); will start integrating this later
+        .format('mp3')
+        .seekInput(timestamp);
       const passthrough = await download.pipe();
 
       const dispatcher = await connection.play(passthrough);
