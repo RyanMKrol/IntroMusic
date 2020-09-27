@@ -13,6 +13,8 @@ const DYNAMO_TABLE = 'IntroMusic';
 // player constants
 const MAX_PLAY_TIME = 12000;
 
+const TIMESTAMP_QUERY_PARAM = 't';
+
 export {
   DISCORD_CREDENTIALS,
   DYNAMO_CREDENTIALS,
@@ -22,4 +24,5 @@ export {
   DYNAMO_REGION,
   DYNAMO_TABLE,
   MAX_PLAY_TIME,
+  TIMESTAMP_QUERY_PARAM,
 };

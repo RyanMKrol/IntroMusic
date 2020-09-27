@@ -7,6 +7,7 @@ import {
   DYNAMO_CREDENTIALS,
   DYNAMO_REGION,
   DYNAMO_TABLE,
+  TIMESTAMP_QUERY_PARAM,
 } from '../constants';
 
 const REGEX_BASE = `${COMMAND_PREFIX} ${COMMAND_ADD} `;
@@ -94,7 +95,7 @@ async function validateYoutubeVideoTimestamp(responseHook, link) {
   const information = await ytdl.getInfo(link);
   const videoLength = information.playerResponse.videoDetails.lengthSeconds;
 
-  const rawTimestamp = new URL(link).searchParams.get('t');
+  const rawTimestamp = new URL(link).searchParams.get(TIMESTAMP_QUERY_PARAM);
 
   if (isUndefined(rawTimestamp)) return true;
 
