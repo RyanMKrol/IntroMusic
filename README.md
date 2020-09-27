@@ -8,7 +8,7 @@ This is a Discord bot that will let you setup intro music whenever you join a vo
 
 To add this bot to your server, use this link:
 
-https://discord.com/api/oauth2/authorize?client_id=730500532531232901&permissions=8&scope=bot
+https://discord.com/oauth2/authorize?client_id=730500532531232901&scope=bot
 
 ## Useful Resources
 
