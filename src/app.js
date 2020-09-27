@@ -33,6 +33,13 @@ import { onGuildCreate, onMessage, onVoiceStateUpdate } from './modules/events';
  * @see https://discord.js.org/#/docs/main/stable/class/VoiceChannel
  */
 
+/**
+ * Type representing the NodeJS Stream's PassThrough construct
+ *
+ * @typedef PassThrough
+ * @see https://nodejs.org/api/stream.html#stream_class_stream_passthrough
+ */
+
 const client = new Discord.Client();
 
 client.on('guildCreate', onGuildCreate);

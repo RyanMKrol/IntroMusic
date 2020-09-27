@@ -71,35 +71,47 @@ async function databaseReadCallback(result, guildId, channel) {
 
   const { link } = result[0];
 
-  channel.join().then(async (connection) => {
+  try {
     const stream = ytdl(link);
     const rawTimestamp = new URL(link).searchParams.get(TIMESTAMP_QUERY_PARAM);
     const timestamp = Number.parseInt(rawTimestamp, 10) || 0;
 
-    try {
-      const download = ffmpeg(stream)
-        .audioBitrate(48)
-        .format('mp3')
-        .seekInput(timestamp);
-      const passthrough = await download.pipe();
+    const download = ffmpeg(stream)
+      .audioBitrate(48)
+      .format('mp3')
+      .seekInput(timestamp);
 
-      const dispatcher = await connection.play(passthrough);
+    const pipedStream = download.pipe();
 
-      const playerTimeout = setTimeout(async () => {
-        if (PLAYER_MANAGER.getIsPlayerPlaying(guildId)) {
-          await connection.disconnect();
-          PLAYER_MANAGER.setIsPlayerPlaying(guildId, false);
-        }
-      }, MAX_PLAY_TIME);
+    playVideo(guildId, channel, pipedStream);
+  } catch (e) {
+    process.stdout.write(`There was an error playing the intro: ${e}`);
+  }
+}
 
-      dispatcher.on('finish', async () => {
-        PLAYER_MANAGER.setIsPlayerPlaying(guildId, false);
+/**
+ * function to join the channel and start playing video
+ *
+ * @param {string} guildId The ID of the guild we're considering playing in
+ * @param {module:app.VoiceChannel} channel The voice channel to play in
+ * @param {module:app.PassThrough} stream The data we want to stream to our channel
+ */
+function playVideo(guildId, channel, stream) {
+  channel.join().then(async (connection) => {
+    const dispatcher = await connection.play(stream);
+
+    const playerTimeout = setTimeout(async () => {
+      if (PLAYER_MANAGER.getIsPlayerPlaying(guildId)) {
         await connection.disconnect();
-        clearTimeout(playerTimeout);
-      });
-    } catch (e) {
-      process.stdout.write(`There was an error playing the intro: ${e}`);
-    }
+        PLAYER_MANAGER.setIsPlayerPlaying(guildId, false);
+      }
+    }, MAX_PLAY_TIME);
+
+    dispatcher.on('finish', async () => {
+      PLAYER_MANAGER.setIsPlayerPlaying(guildId, false);
+      await connection.disconnect();
+      clearTimeout(playerTimeout);
+    });
   });
 }
 
