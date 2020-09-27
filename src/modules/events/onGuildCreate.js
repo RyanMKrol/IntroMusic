@@ -10,8 +10,8 @@ async function onGuildCreate(guild) {
     .find((t) => t.name === 'general')
     .send(
       'Thanks for inviting my bot! You can use it via the following commands:\n'
-        + `- \`${COMMAND_PREFIX}${COMMAND_ADD} <youtube_link>\`\n`
-        + `- \`${COMMAND_PREFIX}${COMMAND_REMOVE}\`\n`
+        + `- \`${COMMAND_PREFIX} ${COMMAND_ADD} <youtube_link>\`\n`
+        + `- \`${COMMAND_PREFIX} ${COMMAND_REMOVE}\`\n`
         + 'Note: only the first 10 seconds of the video you pick will play, so choose wisely.',
     );
 }
