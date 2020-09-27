@@ -74,7 +74,7 @@ async function databaseReadCallback(result, guildId, channel) {
   channel.join().then(async (connection) => {
     const stream = ytdl(link);
     const rawTimestamp = new URL(link).searchParams.get(TIMESTAMP_QUERY_PARAM);
-    const timestamp = Number.parseInt(rawTimestamp, 10);
+    const timestamp = Number.parseInt(rawTimestamp, 10) || 0;
 
     try {
       const download = ffmpeg(stream)
