@@ -31,31 +31,35 @@ const READ_QUEUE = new DynamoReadQueue(DYNAMO_CREDENTIALS, DYNAMO_REGION, DYNAMO
  * @param {module:app.VoiceState} newState The new voice state
  */
 async function voiceStateUpdate(oldState, newState) {
-  const guildId = oldState.guild.id;
+  try {
+    const guildId = oldState.guild.id;
 
-  if (shouldPlayIntro(oldState, newState)) {
-    PLAYER_MANAGER.setIsPlayerPlaying(guildId, true);
+    if (shouldPlayIntro(oldState, newState)) {
+      PLAYER_MANAGER.setIsPlayerPlaying(guildId, true);
 
-    /**
-     * Closure to let us pass some values to the actual read callback
-     *
-     * @param {Array.<DynamoReadResult>} result Result of the database read
-     * @returns {void} Nothing
-     */
-    const callback = (result) => databaseReadCallback(result, guildId, newState.channel);
+      /**
+       * Closure to let us pass some values to the actual read callback
+       *
+       * @param {Array.<DynamoReadResult>} result Result of the database read
+       * @returns {void} Nothing
+       */
+      const callback = (result) => databaseReadCallback(result, guildId, newState.channel);
 
-    const expression = 'userId = :userId';
-    const expressionData = {
-      ':userId': newState.member.user.id,
-    };
+      const expression = 'userId = :userId';
+      const expressionData = {
+        ':userId': newState.member.user.id,
+      };
 
-    READ_QUEUE.push(
-      {
-        expression,
-        expressionData,
-      },
-      callback,
-    );
+      READ_QUEUE.push(
+        {
+          expression,
+          expressionData,
+        },
+        callback,
+      );
+    }
+  } catch (e) {
+    process.stdout.write(`There was an error playing the intro: ${e}`);
   }
 }
 
@@ -71,22 +75,18 @@ async function databaseReadCallback(result, guildId, channel) {
 
   const { link } = result[0];
 
-  try {
-    const stream = ytdl(link);
-    const rawTimestamp = new URL(link).searchParams.get(TIMESTAMP_QUERY_PARAM);
-    const timestamp = Number.parseInt(rawTimestamp, 10) || 0;
+  const stream = ytdl(link);
+  const rawTimestamp = new URL(link).searchParams.get(TIMESTAMP_QUERY_PARAM);
+  const timestamp = Number.parseInt(rawTimestamp, 10) || 0;
 
-    const download = ffmpeg(stream)
-      .audioBitrate(48)
-      .format('mp3')
-      .seekInput(timestamp);
+  const download = ffmpeg(stream)
+    .audioBitrate(48)
+    .format('mp3')
+    .seekInput(timestamp);
 
-    const pipedStream = download.pipe();
+  const pipedStream = download.pipe();
 
-    playVideo(guildId, channel, pipedStream);
-  } catch (e) {
-    process.stdout.write(`There was an error playing the intro: ${e}`);
-  }
+  playVideo(guildId, channel, pipedStream);
 }
 
 /**
