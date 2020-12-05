@@ -93,7 +93,8 @@ async function validateYoutubeVideoAvailable(responseHook, link) {
  */
 async function validateYoutubeVideoTimestamp(responseHook, link) {
   const information = await ytdl.getInfo(link);
-  const videoLength = information.playerResponse.videoDetails.lengthSeconds;
+
+  const videoLength = information.videoDetails.lengthSeconds;
 
   const rawTimestamp = new URL(link).searchParams.get(TIMESTAMP_QUERY_PARAM);
 
