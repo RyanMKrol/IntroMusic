@@ -86,7 +86,7 @@ async function databaseReadCallback(result, guildId, channel) {
 
   const { link } = result[0];
 
-  const stream = ytdl(link);
+  const stream = ytdl(link, { filter: 'audioonly' });
 
   const rawTimestamp = new URL(link).searchParams.get(TIMESTAMP_QUERY_PARAM);
   const timestamp = Number.parseInt(rawTimestamp, 10) || 0;
