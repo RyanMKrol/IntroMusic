@@ -16,12 +16,23 @@ import PLAYER_MANAGER from '../data-structures';
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
 const READ_QUEUE = new DynamoReadQueue(DYNAMO_CREDENTIALS, DYNAMO_REGION, DYNAMO_TABLE);
+const FALLBACK_VIDEO = 'https://www.youtube.com/watch?v=CQeezCdF4mk';
 
 /**
  * @typedef DynamoReadResult
  * @type {object}
  * @property {string} userId The userId that the link is stored for
  * @property {string} link The link to play over discord
+ */
+
+/**
+ * @typedef YTDL_Stream
+ * @see https://www.npmjs.com/package/ytdl-core
+ */
+
+/**
+ * @typedef Stream
+ * @see https://nodejs.org/api/stream.html
  */
 
 /**
@@ -76,17 +87,43 @@ async function databaseReadCallback(result, guildId, channel) {
   const { link } = result[0];
 
   const stream = ytdl(link);
+
   const rawTimestamp = new URL(link).searchParams.get(TIMESTAMP_QUERY_PARAM);
   const timestamp = Number.parseInt(rawTimestamp, 10) || 0;
 
-  const download = ffmpeg(stream)
-    .audioBitrate(48)
-    .format('mp3')
-    .seekInput(timestamp);
+  checkIfStreamPlayable(stream, timestamp)
+    .then((playableStream) => {
+      playVideo(guildId, channel, playableStream);
+    })
+    .catch(() => {
+      const fallbackStream = ytdl(FALLBACK_VIDEO);
+      playVideo(guildId, channel, fallbackStream);
+    });
+}
 
-  const pipedStream = download.pipe();
+/**
+ * Method to check if the user's stream is playable
+ *
+ * @param {YTDL_Stream} stream The stream created from ytdl download
+ * @param {number} timestamp The timestamp to start the video at
+ * @returns {Promise.<Stream> | null} The stream to play, or nothing
+ */
+async function checkIfStreamPlayable(stream, timestamp) {
+  return new Promise((resolve, reject) => {
+    const download = ffmpeg(stream)
+      .audioBitrate(48)
+      .format('mp3')
+      .seekInput(timestamp);
 
-  playVideo(guildId, channel, pipedStream);
+    const verifiedDownload = download
+      .on('error', () => {
+        reject();
+      })
+      .on('codecData', () => {
+        resolve(verifiedDownload);
+      })
+      .pipe();
+  });
 }
 
 /**
