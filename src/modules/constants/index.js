@@ -11,7 +11,7 @@ const DYNAMO_REGION = 'us-east-2';
 const DYNAMO_TABLE = 'IntroMusic';
 
 // player constants
-const MAX_PLAY_TIME = 12000;
+const MAX_PLAY_TIME_MS = 10000;
 
 const TIMESTAMP_QUERY_PARAM = 't';
 
@@ -23,6 +23,6 @@ export {
   COMMAND_REMOVE,
   DYNAMO_REGION,
   DYNAMO_TABLE,
-  MAX_PLAY_TIME,
+  MAX_PLAY_TIME_MS,
   TIMESTAMP_QUERY_PARAM,
 };

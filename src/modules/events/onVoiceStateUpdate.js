@@ -4,7 +4,7 @@ import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import ytdl from 'ytdl-core';
 
 import {
-  MAX_PLAY_TIME,
+  MAX_PLAY_TIME_MS,
   DYNAMO_CREDENTIALS,
   DYNAMO_REGION,
   DYNAMO_TABLE,
@@ -142,7 +142,7 @@ function playVideo(guildId, channel, stream) {
         await connection.disconnect();
         PLAYER_MANAGER.setIsPlayerPlaying(guildId, false);
       }
-    }, MAX_PLAY_TIME);
+    }, MAX_PLAY_TIME_MS);
 
     dispatcher.on('finish', async () => {
       PLAYER_MANAGER.setIsPlayerPlaying(guildId, false);
