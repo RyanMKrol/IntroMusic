@@ -1,13 +1,9 @@
 import { DynamoDeleteQueue } from 'noodle-utils';
 import {
-  COMMAND_PREFIX,
-  COMMAND_REMOVE,
-  DYNAMO_CREDENTIALS,
-  DYNAMO_REGION,
-  DYNAMO_TABLE,
+  COMMAND_PREFIX, DYNAMO_CREDENTIALS, DYNAMO_REGION, DYNAMO_TABLE,
 } from '../constants';
 
-const REGEX_BASE = `${COMMAND_PREFIX} ${COMMAND_REMOVE}`;
+const IS_REMOVE_COMMAND_REGEX = `${COMMAND_PREFIX} remove`;
 const DELETE_QUEUE = new DynamoDeleteQueue(DYNAMO_CREDENTIALS, DYNAMO_REGION, DYNAMO_TABLE);
 
 /**
@@ -33,7 +29,7 @@ async function remove(messageHook) {
  * @returns {boolean} Whether the command is a remove command or not
  */
 function isRemove(command) {
-  const isRemovePattern = new RegExp(`${REGEX_BASE}`);
+  const isRemovePattern = new RegExp(IS_REMOVE_COMMAND_REGEX);
   return command.match(isRemovePattern);
 }
 

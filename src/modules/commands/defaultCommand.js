@@ -1,4 +1,4 @@
-import { COMMAND_PREFIX, COMMAND_REMOVE, COMMAND_ADD } from '../constants';
+import { COMMAND_PREFIX } from '../constants';
 
 const IS_BOT_COMMAND_REGEX = `${COMMAND_PREFIX} .*`;
 
@@ -15,8 +15,11 @@ async function defaultCommand(messageHook) {
 
   await messageHook.reply(
     `This command (\`${command}\`) isn't supported, please use one of:\n`
-      + `- \`${COMMAND_PREFIX} ${COMMAND_ADD} <youtube_link>\`\n`
-      + `- \`${COMMAND_PREFIX} ${COMMAND_REMOVE}\``,
+      + `- \`${COMMAND_PREFIX} add -link <youtube_link>\`\n`
+      + `- \`${COMMAND_PREFIX} add -link <youtube_link> -start <start_seconds>\`\n`
+      + `- \`${COMMAND_PREFIX} add -link <youtube_link> -runtime <runtime_seconds>\`\n`
+      + `- \`${COMMAND_PREFIX} add -link <youtube_link> -start <start_seconds> -runtime <runtime_seconds>\`\n`
+      + `- \`${COMMAND_PREFIX} remove\``,
   );
 
   return true;

@@ -4,11 +4,7 @@ import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import ytdl from 'ytdl-core';
 
 import {
-  MAX_PLAY_TIME_MS,
-  DYNAMO_CREDENTIALS,
-  DYNAMO_REGION,
-  DYNAMO_TABLE,
-  TIMESTAMP_QUERY_PARAM,
+  MAX_PLAY_TIME_S, DYNAMO_CREDENTIALS, DYNAMO_REGION, DYNAMO_TABLE,
 } from '../constants';
 
 import PLAYER_MANAGER from '../data-structures';
@@ -84,20 +80,20 @@ async function voiceStateUpdate(oldState, newState) {
 async function databaseReadCallback(result, guildId, channel) {
   if (!validateDatabaseRead(result)) return;
 
-  const { link } = result[0];
+  const { link, start, runtime } = result[0];
 
   const stream = ytdl(link, { filter: 'audioonly' });
 
-  const rawTimestamp = new URL(link).searchParams.get(TIMESTAMP_QUERY_PARAM);
-  const timestamp = Number.parseInt(rawTimestamp, 10) || 0;
+  const timestamp = start || 0;
+  const videoRuntime = (runtime || MAX_PLAY_TIME_S) * 1000;
 
   checkIfStreamPlayable(stream, timestamp)
     .then((playableStream) => {
-      playVideo(guildId, channel, playableStream);
+      playVideo(guildId, channel, playableStream, videoRuntime);
     })
     .catch(() => {
-      const fallbackStream = ytdl(FALLBACK_VIDEO);
-      playVideo(guildId, channel, fallbackStream);
+      const fallbackStream = ytdl(FALLBACK_VIDEO, { filter: 'audioonly' });
+      playVideo(guildId, channel, fallbackStream, MAX_PLAY_TIME_S * 1000);
     });
 }
 
@@ -132,8 +128,9 @@ async function checkIfStreamPlayable(stream, timestamp) {
  * @param {string} guildId The ID of the guild we're considering playing in
  * @param {module:app.VoiceChannel} channel The voice channel to play in
  * @param {module:app.PassThrough} stream The data we want to stream to our channel
+ * @param {number} runtime How long the video runs for, in MS
  */
-function playVideo(guildId, channel, stream) {
+function playVideo(guildId, channel, stream, runtime) {
   channel.join().then(async (connection) => {
     const dispatcher = await connection.play(stream);
 
@@ -142,7 +139,7 @@ function playVideo(guildId, channel, stream) {
         await connection.disconnect();
         PLAYER_MANAGER.setIsPlayerPlaying(guildId, false);
       }
-    }, MAX_PLAY_TIME_MS);
+    }, runtime);
 
     dispatcher.on('finish', async () => {
       PLAYER_MANAGER.setIsPlayerPlaying(guildId, false);

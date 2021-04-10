@@ -1,16 +1,21 @@
 import ytdl from 'ytdl-core';
-import { isUndefined, DynamoWriteQueue } from 'noodle-utils';
+import { DynamoWriteQueue } from 'noodle-utils';
 
 import {
   COMMAND_PREFIX,
-  COMMAND_ADD,
   DYNAMO_CREDENTIALS,
   DYNAMO_REGION,
   DYNAMO_TABLE,
-  TIMESTAMP_QUERY_PARAM,
+  MAX_PLAY_TIME_S,
 } from '../constants';
 
-const REGEX_BASE = `${COMMAND_PREFIX} ${COMMAND_ADD} `;
+const IS_ADD_COMMAND_REGEX = `${COMMAND_PREFIX} add .*`;
+const PROPERTIES_REGEX = {
+  link: /.*-link (?<link>[^ ]*)/,
+  start: /.*-start (?<start>[^ ]*)/,
+  runtime: /.*-runtime (?<runtime>[^ ]*)/,
+};
+
 const WRITE_QUEUE = new DynamoWriteQueue(DYNAMO_CREDENTIALS, DYNAMO_REGION, DYNAMO_TABLE);
 
 /**
@@ -24,17 +29,32 @@ async function add(messageHook) {
 
   if (!isAdd(command)) return false;
 
-  // should be an array with one item - the link to set the intro music to
-  const youtubeLinkArray = command.slice(REGEX_BASE.length).split(' ');
-  const link = youtubeLinkArray[0];
+  const properties = parseCommandProperties(command);
+  const { link, start, runtime } = properties;
 
   if (!(await validateYoutubeLink(messageHook, link))) return true;
   if (!(await validateYoutubeVideoAvailable(messageHook, link))) return true;
-  if (!(await validateYoutubeVideoTimestamp(messageHook, link))) return true;
+  if (!(await validateYoutubeVideoTimestamp(messageHook, link, start, runtime))) return true;
 
-  storeNewLink(messageHook, link);
+  storeNewLink(messageHook, link, start, runtime);
 
   return true;
+}
+
+/**
+ * Parse the properties for the request command
+ *
+ * @param {string} command The command to parse
+ * @returns {object} A store of properties for the command
+ */
+function parseCommandProperties(command) {
+  return Object.keys(PROPERTIES_REGEX).reduce((acc, key) => {
+    const matches = command.match(PROPERTIES_REGEX[key]);
+    const value = matches === null ? undefined : matches.groups[key];
+
+    acc[key] = value;
+    return acc;
+  }, {});
 }
 
 /**
@@ -44,8 +64,12 @@ async function add(messageHook) {
  * @returns {boolean} Whether the command is an add command or not
  */
 function isAdd(command) {
-  const isAddPattern = new RegExp(`${REGEX_BASE}.*`);
-  return command.match(isAddPattern);
+  const isAddPattern = new RegExp(IS_ADD_COMMAND_REGEX);
+
+  const addMatch = command.match(isAddPattern);
+  const linkMatch = command.match(PROPERTIES_REGEX.link);
+
+  return addMatch !== null && linkMatch !== null;
 }
 
 /**
@@ -89,20 +113,19 @@ async function validateYoutubeVideoAvailable(responseHook, link) {
  *
  * @param {module:app.Message} responseHook The hook to respond with if the timestamp is invalid
  * @param {string} link The youtube link to test
+ * @param {number} start The starting timestamp in seconds
+ * @param {number} runtime The time the request would like to run the video for
  * @returns {boolean} Whether the timestamp is valid or not
  */
-async function validateYoutubeVideoTimestamp(responseHook, link) {
+async function validateYoutubeVideoTimestamp(responseHook, link, start, runtime) {
   const information = await ytdl.getInfo(link);
 
   const videoLength = information.videoDetails.lengthSeconds;
 
-  const rawTimestamp = new URL(link).searchParams.get(TIMESTAMP_QUERY_PARAM);
+  const normalisedStart = typeof start === 'undefined' ? 0 : start;
+  const normalisedRuntime = typeof runtime === 'undefined' ? MAX_PLAY_TIME_S : runtime;
 
-  if (isUndefined(rawTimestamp)) return true;
-
-  const numTimestamp = Number.parseInt(rawTimestamp, 10);
-
-  const isTimestampValid = !Number.isNaN(numTimestamp) && numTimestamp < videoLength;
+  const isTimestampValid = normalisedStart < videoLength && normalisedRuntime <= MAX_PLAY_TIME_S;
 
   if (!isTimestampValid) {
     await responseHook.reply("Sorry, the timestamp you've provided for the video is invalid");
@@ -116,11 +139,15 @@ async function validateYoutubeVideoTimestamp(responseHook, link) {
  *
  * @param {module:app.Message} responseHook The hook to send a message with once the link is stored
  * @param {string} link The youtube link to store
+ * @param {number} start The starting timestamp in seconds
+ * @param {number} runtime The time the request would like to run the video for
  */
-async function storeNewLink(responseHook, link) {
+async function storeNewLink(responseHook, link, start, runtime) {
   const storageItem = {
     userId: responseHook.author.id,
     link,
+    start,
+    runtime,
   };
 
   /**

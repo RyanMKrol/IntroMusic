@@ -4,25 +4,18 @@ import DYNAMO_CREDENTIALS from '../../../credentials/dynamo.json';
 
 // command constants
 const COMMAND_PREFIX = '!im';
-const COMMAND_ADD = 'add';
-const COMMAND_REMOVE = 'remove';
 
 const DYNAMO_REGION = 'us-east-2';
 const DYNAMO_TABLE = 'IntroMusic';
 
 // player constants
-const MAX_PLAY_TIME_MS = 10000;
-
-const TIMESTAMP_QUERY_PARAM = 't';
+const MAX_PLAY_TIME_S = 10;
 
 export {
   DISCORD_CREDENTIALS,
   DYNAMO_CREDENTIALS,
   COMMAND_PREFIX,
-  COMMAND_ADD,
-  COMMAND_REMOVE,
   DYNAMO_REGION,
   DYNAMO_TABLE,
-  MAX_PLAY_TIME_MS,
-  TIMESTAMP_QUERY_PARAM,
+  MAX_PLAY_TIME_S,
 };

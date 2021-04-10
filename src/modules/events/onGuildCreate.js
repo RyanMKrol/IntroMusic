@@ -1,4 +1,4 @@
-import { COMMAND_PREFIX, COMMAND_ADD, COMMAND_REMOVE } from '../constants';
+import { COMMAND_PREFIX } from '../constants';
 
 /**
  * Method to handle when the bot is added to a server
@@ -10,9 +10,12 @@ async function onGuildCreate(guild) {
     .find((t) => t.name === 'general')
     .send(
       'Thanks for inviting my bot! You can use it via the following commands:\n'
-        + `- \`${COMMAND_PREFIX} ${COMMAND_ADD} <youtube_link>\`\n`
-        + `- \`${COMMAND_PREFIX} ${COMMAND_REMOVE}\`\n`
-        + 'Note: only the first 10 seconds of the video you pick will play, so choose wisely.',
+        + `- \`${COMMAND_PREFIX} add -link <youtube_link>\`\n`
+        + `- \`${COMMAND_PREFIX} add -link <youtube_link> -start <start_seconds>\`\n`
+        + `- \`${COMMAND_PREFIX} add -link <youtube_link> -runtime <runtime_seconds>\`\n`
+        + `- \`${COMMAND_PREFIX} add -link <youtube_link> -start <start_seconds> -runtime <runtime_seconds>\`\n`
+        + `- \`${COMMAND_PREFIX} remove\``,
+      +'Note: only the first 10 seconds of the video you pick will play, so choose wisely.',
     );
 }
 
