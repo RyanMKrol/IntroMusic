@@ -122,10 +122,13 @@ async function validateYoutubeVideoTimestamp(responseHook, link, start, runtime)
 
   const videoLength = information.videoDetails.lengthSeconds;
 
-  const normalisedStart = typeof start === 'undefined' ? 0 : start;
-  const normalisedRuntime = typeof runtime === 'undefined' ? MAX_PLAY_TIME_S : runtime;
+  const normalisedStart = typeof start === 'undefined' ? 0 : parseInt(start, 10);
+  const normalisedRuntime = typeof runtime === 'undefined' ? MAX_PLAY_TIME_S : parseInt(runtime, 10);
 
-  const isTimestampValid = normalisedStart < videoLength && normalisedRuntime <= MAX_PLAY_TIME_S;
+  const isTimestampValid = !Number.isNaN(normalisedStart)
+    && !Number.isNaN(normalisedRuntime)
+    && normalisedStart < videoLength
+    && normalisedRuntime <= MAX_PLAY_TIME_S;
 
   if (!isTimestampValid) {
     await responseHook.reply("Sorry, the timestamp you've provided for the video is invalid");
