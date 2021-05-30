@@ -23,7 +23,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "noodle-utils": "^3.2.0",
     "opusscript": "0.0.7",
-    "ytdl-core": "^4.5.0"
+    "ytdl-core": "^4.8.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.4",
@@ -34,6 +34,6 @@
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jsdoc": "^30.4.1",
     "husky": "^4.2.5",
-    "jsdoc": "^3.6.5"
+    "jsdoc": "^3.6.7"
   }
 }
