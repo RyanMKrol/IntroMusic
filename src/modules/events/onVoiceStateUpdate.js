@@ -82,7 +82,7 @@ async function databaseReadCallback(result, guildId, channel) {
 
   const { link, start, runtime } = result[0];
 
-  const stream = ytdl(link, { filter: 'audioonly' });
+  const stream = ytdl(link, { filter: 'audioonly', quality: 'highestaudio' });
 
   const timestamp = start || 0;
   const videoRuntime = (runtime || MAX_PLAY_TIME_S) * 1000;
