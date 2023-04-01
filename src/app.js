@@ -2,7 +2,7 @@ import {
   Client, Collection, Events, GatewayIntentBits,
 } from 'discord.js';
 
-import DISCORD_CREDENTIALS from './modules/constants';
+import { DISCORD_CREDENTIALS } from './modules/constants';
 import { logger } from './modules/logger';
 import * as COMMANDS from './modules/commands';
 
