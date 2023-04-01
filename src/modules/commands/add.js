@@ -55,7 +55,6 @@ export default {
 
     if (isValid) {
       storeIntroMusicConfig(interaction, link, start, runtime);
-      interaction.followUp('Doing something here!');
     }
   },
 };
@@ -113,7 +112,7 @@ async function storeIntroMusicConfig(interaction, link, start, runtime) {
   };
 
   /**
-   *Callback to use once the new link has been stored
+   * Post a message in the channel once the video is saved
    *
    * @returns {void} Nothing
    */

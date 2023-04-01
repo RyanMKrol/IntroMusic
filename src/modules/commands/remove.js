@@ -1,4 +1,11 @@
 import { SlashCommandBuilder, BaseInteraction } from 'discord.js';
+import { DynamoDeleteQueue } from 'noodle-utils';
+
+import {
+  DYNAMO_CREDENTIALS, DYNAMO_REGION, DYNAMO_TABLE,
+} from '../constants';
+
+const DELETE_QUEUE = new DynamoDeleteQueue(DYNAMO_CREDENTIALS, DYNAMO_REGION, DYNAMO_TABLE);
 
 export default {
   data: new SlashCommandBuilder()
@@ -11,6 +18,21 @@ export default {
    * @param {BaseInteraction} interaction User interaction object
    */
   async execute(interaction) {
-    interaction.reply('Removed!');
+    const userId = interaction.member.user.id;
+
+    const removeItem = {
+      userId,
+    };
+
+    /**
+     * Post a message in the channel once the video is removed
+     *
+     * @returns {void} Nothing
+     */
+    const removeCallback = () => {
+      interaction.reply('Removed your intro music!');
+    };
+
+    DELETE_QUEUE.push(removeItem, removeCallback);
   },
 };
