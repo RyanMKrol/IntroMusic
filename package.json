@@ -1,39 +1,40 @@
 {
-  "name": "IntroMusic",
+  "name": "IntroBot",
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
     "build": "npm run lint && ./node_modules/.bin/babel src --out-dir build",
+    "debug": "npm run-script build && DEBUG=NiftyBot:* node build/app.js",
+    "deployCommands": "npm run-script build && DEBUG=NiftyBot:* node build/deploy-commands.js",
     "lint": "eslint src/ --ext .js",
+    "prepare": "husky install",
     "start": "npm run-script build && node build/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "./scripts/husky"
-    }
-  },
   "dependencies": {
-    "@babel/polyfill": "^7.10.4",
-    "@ffmpeg-installer/ffmpeg": "^1.0.20",
-    "core-js": "^3.6.5",
-    "discord.js": "^12.5.1",
-    "ffmpeg": "0.0.4",
-    "ffmpeg-static": "^4.4.0",
+    "@discordjs/voice": "^0.15.0",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "core-js": "^3.29.1",
+    "debug": "^4.3.4",
+    "discord.js": "^14.8.0",
+    "ffmpeg": "^0.0.4",
+    "ffmpeg-static": "^5.1.0",
     "fluent-ffmpeg": "^2.1.2",
-    "noodle-utils": "^3.2.0",
-    "opusscript": "0.0.8",
-    "ytdl-core": "^4.11.2"
+    "libsodium-wrappers": "^0.7.11",
+    "opusscript": "^0.0.8",
+    "regenerator-runtime": "^0.13.11",
+    "supports-color": "^9.3.1",
+    "ytdl-core": "^4.11.3",
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.4",
-    "@babel/core": "^7.10.4",
-    "@babel/preset-env": "^7.10.4",
-    "eslint": "^7.4.0",
-    "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-jsdoc": "^30.4.1",
-    "husky": "^4.2.5",
-    "jsdoc": "^3.6.7"
+    "@babel/cli": "^7.21.0",
+    "@babel/core": "^7.21.3",
+    "@babel/preset-env": "^7.20.2",
+    "eslint": "^8.36.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsdoc": "^40.1.0",
+    "husky": "^8.0.3",
+    "jsdoc": "^4.0.2"
   }
 }
