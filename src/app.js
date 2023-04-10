@@ -96,12 +96,14 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
  * @param {object} channel The channel that the user joined
  */
 async function handleUserJoiningVoiceChannel(guildId, userId, channel) {
+  logger.debug('A user has entered the channel...');
+
   /**
    * Handles the database response by loading a video and playing it over Discord
    *
    * @param {object} result The DynamoDB read result
    */
-  const callback = (result) => {
+  const callback = async (result) => {
     if (result.length !== 1) return;
 
     const { link, start, runtime } = result[0];
@@ -110,8 +112,7 @@ async function handleUserJoiningVoiceChannel(guildId, userId, channel) {
 
     logger.debug('Setting up ytdl stream...');
     const rawStream = ytdl(link, {
-      // eslint-disable-next-line jsdoc/require-jsdoc
-      filter: 'audio',
+      filter: 'audioonly',
       quality: 'lowestaudio',
       highWaterMark: 1 << 25,
     });
