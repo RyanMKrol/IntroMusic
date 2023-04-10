@@ -119,6 +119,7 @@ async function handleUserJoiningVoiceChannel(guildId, userId, channel) {
     });
 
     player.on(AudioPlayerStatus.Playing, () => {
+      logger.debug('Video is playing');
       const connection = joinVoiceChannel({
         channelId: channel.id,
         guildId,
@@ -137,17 +138,19 @@ async function handleUserJoiningVoiceChannel(guildId, userId, channel) {
       });
     });
 
-    logger.debug(link);
+    logger.debug('Getting ytdl information');
     const rawStream = ytdl(link, {
       filter: 'audioonly',
       quality: 'highestaudio',
-      highWaterMark: 1 << 25,
     });
 
+    logger.debug('Creating ffmpeg stream');
     createFfmpegStream(rawStream, start).then((playableStream) => {
+      logger.debug('We have an ffmpeg stream');
       const playerResource = createAudioResource(playableStream);
 
-      logger.debug('Playing video...');
+      logger.debug('Set up a player resource');
+
       player.play(playerResource);
     });
   };
@@ -175,17 +178,19 @@ async function handleUserJoiningVoiceChannel(guildId, userId, channel) {
  */
 async function createFfmpegStream(stream, startTimestamp) {
   return new Promise((resolve, reject) => {
+    logger.debug('Starting ffmpeg process');
     const download = ffmpeg(stream)
       .audioBitrate(48)
-      .format('ogg')
+      .format('mp3')
       .seekInput(startTimestamp);
 
     const verifiedDownload = download
       .on('error', (downloadError) => {
-        logger.debug('Had an issue with this video', downloadError);
+        logger.error('Had an issue with this video', downloadError);
         reject();
       })
       .on('codecData', () => {
+        logger.debug('received codec data');
         resolve(verifiedDownload);
       })
       .pipe();
