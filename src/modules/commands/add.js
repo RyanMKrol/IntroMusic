@@ -84,7 +84,8 @@ async function validateUserInput(interaction, requestedlink, requestedStart) {
     return false;
   }
 
-  const videoRuntime = videoInformation.lengthSeconds;
+  const videoRuntime = Number.parseInt(videoInformation.videoDetails.lengthSeconds, 10);
+
   if (requestedStart > videoRuntime) {
     await interaction.followUp(`Problem with start:\n\`${requestedStart}\`\nReason: Requested start is later than video runtime`);
     return false;
