@@ -1,4 +1,5 @@
 /* eslint-disable no-bitwise */
+
 import {
   Client, Collection, Events, GatewayIntentBits,
 } from 'discord.js';
@@ -15,6 +16,7 @@ import {
   AudioPlayerStatus,
   createAudioResource,
   getVoiceConnection,
+  AudioPlayer,
 } from '@discordjs/voice';
 
 import {
@@ -104,53 +106,22 @@ async function handleUserJoiningVoiceChannel(guildId, userId, channel) {
 
     const { link, start, runtime } = result[0];
 
-    logger.debug(link, start, runtime);
+    const player = setupPlayer(guildId, channel, runtime);
 
-    const player = createAudioPlayer({
-      behaviors: {
-        noSubscriber: NoSubscriberBehavior.Pause,
-      },
-    });
-
-    player.on(AudioPlayerStatus.Idle, () => {
-      logger.debug('Destroying the connection because the player has finished playing');
-      getVoiceConnection(guildId).destroy();
-      player.stop();
-    });
-
-    player.on(AudioPlayerStatus.Playing, () => {
-      logger.debug('Video is playing');
-      const connection = joinVoiceChannel({
-        channelId: channel.id,
-        guildId,
-        adapterCreator: channel.guild.voiceAdapterCreator,
-      });
-
-      connection.on(VoiceConnectionStatus.Ready, async () => {
-        logger.debug('Connection is ready to play video');
-        connection.subscribe(player);
-
-        setTimeout(async () => {
-          logger.debug('Destroying the connection based on the timeout');
-          connection.destroy();
-          player.stop();
-        }, runtime * 1000);
-      });
-    });
-
-    logger.debug('Getting ytdl information');
+    logger.debug('Setting up ytdl stream...');
     const rawStream = ytdl(link, {
-      filter: 'audioonly',
-      quality: 'highestaudio',
+      // eslint-disable-next-line jsdoc/require-jsdoc
+      filter: 'audio',
+      quality: 'lowestaudio',
+      highWaterMark: 1 << 25,
     });
 
-    logger.debug('Creating ffmpeg stream');
+    logger.debug('Creating ffmpeg stream...');
     createFfmpegStream(rawStream, start).then((playableStream) => {
-      logger.debug('We have an ffmpeg stream');
+      logger.debug('Creating audio resource...');
       const playerResource = createAudioResource(playableStream);
 
-      logger.debug('Set up a player resource');
-
+      logger.debug('Directing player to play resource...');
       player.play(playerResource);
     });
   };
@@ -178,10 +149,10 @@ async function handleUserJoiningVoiceChannel(guildId, userId, channel) {
  */
 async function createFfmpegStream(stream, startTimestamp) {
   return new Promise((resolve, reject) => {
-    logger.debug('Starting ffmpeg process');
     const download = ffmpeg(stream)
       .audioBitrate(48)
       .format('mp3')
+      .noVideo()
       .seekInput(startTimestamp);
 
     const verifiedDownload = download
@@ -190,11 +161,60 @@ async function createFfmpegStream(stream, startTimestamp) {
         reject();
       })
       .on('codecData', () => {
-        logger.debug('received codec data');
+        logger.debug('Received codec data');
         resolve(verifiedDownload);
       })
       .pipe();
   });
+}
+
+/**
+ * Creates a player object
+ *
+ * @param {string} guildId The server ID
+ * @param {object} channel The channel that the user joined
+ * @param {number} runtime How long the video should run for
+ * @returns {AudioPlayer} An audio player
+ */
+function setupPlayer(guildId, channel, runtime) {
+  const player = createAudioPlayer({
+    behaviors: {
+      noSubscriber: NoSubscriberBehavior.Pause,
+    },
+  });
+
+  player.on(AudioPlayerStatus.Idle, () => {
+    logger.debug('Destroying the connection because the player has finished playing');
+    getVoiceConnection(guildId).destroy();
+    player.stop();
+  });
+
+  player.on(AudioPlayerStatus.Playing, () => {
+    logger.debug('Joining discord channel...');
+    const connection = joinVoiceChannel({
+      channelId: channel.id,
+      guildId,
+      adapterCreator: channel.guild.voiceAdapterCreator,
+    });
+
+    connection.on(VoiceConnectionStatus.Ready, async () => {
+      logger.debug('Connection is ready to play video');
+      connection.subscribe(player);
+
+      setTimeout(async () => {
+        // the connection may already be cleaned up because the video ended
+        // before the timeout triggered
+        const maybeConnection = getVoiceConnection(guildId);
+        if (maybeConnection) {
+          logger.debug('Destroying the connection based on the timeout');
+          maybeConnection.destroy();
+          player.stop();
+        }
+      }, runtime * 1000);
+    });
+  });
+
+  return player;
 }
 
 // Log in to Discord
