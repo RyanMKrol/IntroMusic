@@ -105,11 +105,6 @@ async function handleUserJoiningVoiceChannel(guildId, userId, channel) {
     const { link, start, runtime } = result[0];
 
     logger.debug(link, start, runtime);
-    const connection = joinVoiceChannel({
-      channelId: channel.id,
-      guildId,
-      adapterCreator: channel.guild.voiceAdapterCreator,
-    });
 
     const player = createAudioPlayer({
       behaviors: {
@@ -119,35 +114,41 @@ async function handleUserJoiningVoiceChannel(guildId, userId, channel) {
 
     player.on(AudioPlayerStatus.Idle, () => {
       logger.debug('Destroying the connection because the player has finished playing');
-      connection.destroy();
+      getVoiceConnection(guildId).destroy();
       player.stop();
     });
 
     player.on(AudioPlayerStatus.Playing, () => {
-      setTimeout(async () => {
-        logger.debug('Destroying the connection based on the timeout');
-        connection.destroy();
-        player.stop();
-      }, runtime * 1000);
+      const connection = joinVoiceChannel({
+        channelId: channel.id,
+        guildId,
+        adapterCreator: channel.guild.voiceAdapterCreator,
+      });
+
+      connection.on(VoiceConnectionStatus.Ready, async () => {
+        logger.debug('Connection is ready to play video');
+        connection.subscribe(player);
+
+        setTimeout(async () => {
+          logger.debug('Destroying the connection based on the timeout');
+          connection.destroy();
+          player.stop();
+        }, runtime * 1000);
+      });
     });
 
-    connection.on(VoiceConnectionStatus.Ready, async () => {
-      logger.debug('Connection is ready to play video');
-      connection.subscribe(player);
+    logger.debug(link);
+    const rawStream = ytdl(link, {
+      filter: 'audioonly',
+      quality: 'highestaudio',
+      highWaterMark: 1 << 25,
+    });
 
-      logger.debug(link);
-      const rawStream = ytdl(link, {
-        filter: 'audioonly',
-        quality: 'highestaudio',
-        highWaterMark: 1 << 25,
-      });
+    createFfmpegStream(rawStream, start).then((playableStream) => {
+      const playerResource = createAudioResource(playableStream);
 
-      await createFfmpegStream(rawStream, start).then((playableStream) => {
-        const playerResource = createAudioResource(playableStream);
-
-        logger.debug('Playing video...');
-        player.play(playerResource);
-      });
+      logger.debug('Playing video...');
+      player.play(playerResource);
     });
   };
 
